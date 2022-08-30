@@ -4,7 +4,7 @@ This package is intended to generate abstractive reports based on sentences or p
 ### Install
 
 ```posh
-pip install git+https://github.com/the-deep/reports_generator #not working yet
+pip install git+https://github.com/the-deep/reports_generator
 ```
 
 ### Usage
