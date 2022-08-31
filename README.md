@@ -27,7 +27,7 @@ original_df_path = pd.read_csv([csv_path])
 labels_list = original_df_path.groundtruth_labels.unique()
 
 # Get summary for each label
-summarized_data = {}
+generated_report = {}
 for one_label in labels_list:
     text_one_label = original_df_path[original_df_path.groundtruth_labels==one_label].original_text.tolist()
     generated_report[one_label] = summarizer(text_one_label)
