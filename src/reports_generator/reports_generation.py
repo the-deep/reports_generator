@@ -98,9 +98,8 @@ class ReportsGenerator:
         except Exception:  # no ranking if pagerank algorithm doesn't converge
             scores = np.ones(len(embeddings_one_cluster))
 
-        # keep 15 sentences with highest scores
-        n_max_kept_sentences = 15
-        top_n_sentence_ids = np.argsort(scores)[::-1][:n_max_kept_sentences]
+        # keep sentences with highest scores
+        top_n_sentence_ids = np.argsort(scores)[::-1]
         ranked_sentences = " ".join(
             [original_sentences_one_cluster[id_tmp] for id_tmp in (top_n_sentence_ids)]
         )
