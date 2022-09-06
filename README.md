@@ -22,21 +22,23 @@ import pandas as pd
 from reports_generator import ReportsGenerator
 summarizer = ReportsGenerator()
 
-# Example of classified data to import, with two columns, one for the `original_text` and one for the `groundtruth_labels`, with one 
-original_df_path = pd.read_csv([csv_path]) 
-labels_list = original_df_path.groundtruth_labels.unique()
+# Example of classified data to import, with two columns, `original_text` and `groundtruth_labels` 
+df = pd.read_csv([csv_path]) 
+labels_list = df.groundtruth_labels.unique()
 
 # Get summary for each label
 generated_report = {}
 for one_label in labels_list:
-    text_one_label = original_df_path[original_df_path.groundtruth_labels==one_label].original_text.tolist()
+    mask_one_label = df.groundtruth_labels==one_label
+    text_one_label = df[mask_one_label].original_text.tolist()
     generated_report[one_label] = summarizer(text_one_label)
 ```
 
 ### Documentation
 - This package is based on pretrained models from the transformers library. It is restrained to the English language only for now. 
 It was first intended to automatically generate reports for the humanitarian world. 
-Examples of fully automatically generated reports can be found here. We need to ask premission to project owners and make the generated reports available...
+- It was tested to automatically generate reports, one example being a
+[Humanitarian Needs Overview for the Ukraine Project](https://drive.google.com/file/d/1TZzRyRdNYxF0etbfmqd1BtqL4V3uT6Ob/view?usp=sharing).
 - To keep the most relevant information only, the library is based on doing summarization iterations on the original text. 
 - We show pseudocodes of the methodlogy used for reports creation
 ```
