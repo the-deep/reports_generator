@@ -1,6 +1,6 @@
 import warnings
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore")
 
 from typing import List
 from collections import defaultdict
