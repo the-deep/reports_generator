@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     # Needed to silence warnings (and to be a worthwhile package)
     name="reports_generator",
-    #url="https://github.com/the-deep/deep-experiments/tree/test-summarization-lib",
+    # url="https://github.com/the-deep/deep-experiments/tree/test-summarization-lib",
     author="Data Friendly Space",
     author_email="",
     # Needed to actually package something
@@ -16,8 +16,8 @@ setup(
         "hdbscan>=0.8.28",
         "networkx>=2.0",
         "nltk>=3.7",
-        "sentence_transformers==2.2.0",
-        "transformers==4.9.2",
+        "sentence_transformers>=2.2.0",
+        "transformers>=4.9.2",
         "umap>=0.1.1",
         "umap_learn>=0.5.3",
     ],
