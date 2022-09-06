@@ -22,7 +22,7 @@ setup(
         "umap_learn>=0.5.3",
     ],
     # *strongly* suggested for sharing
-    version="0.1",
+    version="0.2",
     # The license can be anything you like
     license="Apache-2.0",
     # We will also need a readme eventually (there will be a warning)
