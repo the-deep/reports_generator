@@ -33,6 +33,10 @@ for one_label in labels_list:
     text_one_label = df[mask_one_label].original_text.tolist()
     generated_report[one_label] = summarizer(text_one_label)
 ```
+#### Usage On Google Colab
+As this library relies on heavy pretrained models, ite requires a significant amount of RAM
+on the Machine (at least 5GM RAM available). Therefore, we recommend using it on an online machine.
+We provide an example notebook using Google Colab [here](https://colab.research.google.com/drive/10WOGeG7rNapZN0Ex2Al6UdgaExUPjH5o?usp=sharing).
 
 ### Documentation
 - This package is based on pretrained models from the transformers library. It is restrained to the English language only for now. 
