@@ -105,8 +105,14 @@ class ReportsGenerator:
         )
 
         # summarize selected sentences
+        max_length_one_cluster = (
+            128 if self.max_summary_length > 128 else self.max_summary_length
+        )
         summarized_entries = self.summarization_model(
-            ranked_sentences, min_length=5, max_length=128, truncation=True
+            ranked_sentences,
+            min_length=1,
+            max_length=max_length_one_cluster,
+            truncation=True,
         )[0]["summary_text"]
 
         return summarized_entries
@@ -174,7 +180,7 @@ class ReportsGenerator:
         self,
         entries: Union[str, List[str]],
         max_iterations: int = 3,
-        max_summary_length: int = 256,
+        max_summary_length: int = 384,
     ) -> str:
         """
         Args:
@@ -197,17 +203,21 @@ class ReportsGenerator:
                 "argument 'entries' must be one of the types [str, List[str]]"
             )
 
-        if get_n_words(entries_as_str) < max_summary_length:
-            warnings.warn(
-                "Warning... The length of the original text is smaller than the maximum summary length, setting 'max_iterations' parameter to 1."
-            )
+        n_raw_text_words = get_n_words(entries_as_str)
+        if n_raw_text_words < max_summary_length:
+            max_summary_length = (n_raw_text_words // 2) - 1
             max_iterations = 1
+            warnings.warn(
+                f"Warning... The length of the original text is smaller than the maximum summary length, setting 'max_iterations' parameter to 1 and the 'max_summary_length' to {max_summary_length}."
+            )
+
+        self.max_summary_length = max_summary_length
 
         summarized_text = self._summarization_iteration(entries_as_str)
         n_iterations = 1
 
         while (
-            get_n_words(summarized_text) > max_summary_length
+            get_n_words(summarized_text) > self.max_summary_length
             and n_iterations < max_iterations
         ):
             summarized_text = self._summarization_iteration(summarized_text)
@@ -215,7 +225,7 @@ class ReportsGenerator:
 
         if (
             n_iterations == max_iterations
-            and get_n_words(summarized_text) > max_summary_length
+            and get_n_words(summarized_text) > self.max_summary_length
         ):
             warnings.warn(
                 "Warning... Maximum number of iterations reached but summarized text length is still longer than the max_length, returning the long summarized version."
