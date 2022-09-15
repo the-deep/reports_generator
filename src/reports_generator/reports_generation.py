@@ -104,10 +104,13 @@ class ReportsGenerator:
             [original_sentences_one_cluster[id_tmp] for id_tmp in (top_n_sentence_ids)]
         )
 
-        # summarize selected sentences
+        # set max cluster summary length
+        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) - 1
         max_length_one_cluster = (
-            128 if self.max_summary_length > 128 else self.max_summary_length
+            128 if max_length_one_cluster > 128 else max_length_one_cluster
         )
+
+        # summarize selected sentences
         summarized_entries = self.summarization_model(
             ranked_sentences,
             min_length=1,
@@ -211,13 +214,11 @@ class ReportsGenerator:
                 f"Warning... The length of the original text is smaller than the maximum summary length, setting 'max_iterations' parameter to 1 and the 'max_summary_length' to {max_summary_length}."
             )
 
-        self.max_summary_length = max_summary_length
-
         summarized_text = self._summarization_iteration(entries_as_str)
         n_iterations = 1
 
         while (
-            get_n_words(summarized_text) > self.max_summary_length
+            get_n_words(summarized_text) > max_summary_length
             and n_iterations < max_iterations
         ):
             summarized_text = self._summarization_iteration(summarized_text)
@@ -225,7 +226,7 @@ class ReportsGenerator:
 
         if (
             n_iterations == max_iterations
-            and get_n_words(summarized_text) > self.max_summary_length
+            and get_n_words(summarized_text) > max_summary_length
         ):
             warnings.warn(
                 "Warning... Maximum number of iterations reached but summarized text length is still longer than the max_length, returning the long summarized version."
