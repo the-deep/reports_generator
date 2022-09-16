@@ -209,6 +209,12 @@ class ReportsGenerator:
                 "argument 'entries' must be one of the types [str, List[str]]"
             )
 
+        if get_n_words(entries_as_str) < 15:
+            n_words = get_n_words(entries_as_str)
+            AssertionError(
+                f"The minimum number of words in the input is 15 but yours is shorter ({n_words}), please provide a longer input text."
+            )
+
         n_raw_text_words = get_n_words(entries_as_str)
         if n_raw_text_words < max_summary_length:
             max_summary_length = (n_raw_text_words // 2) - 1
