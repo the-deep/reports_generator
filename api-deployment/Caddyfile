@@ -1,0 +1,9 @@
+{
+    email dev@thedeep.io
+}
+
+reportgen.labs.thedeep.io {
+    reverse_proxy core_api:8080 {
+        header_up X-Forwarded-Proto https
+    }
+}

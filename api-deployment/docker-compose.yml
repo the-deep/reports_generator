@@ -1,0 +1,20 @@
+version: '3'
+services:
+  core_api:
+    build: .
+    container_name: "summarizer-container"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    restart: unless-stopped
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - core_api
