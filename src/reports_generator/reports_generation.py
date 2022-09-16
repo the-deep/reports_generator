@@ -15,8 +15,7 @@ from nltk.tokenize import sent_tokenize
 import nltk
 
 nltk.download("punkt")
-import hdbscan
-import umap.umap_ as umap
+from sklearn.cluster import MiniBatchKMeans
 
 from .utils import preprocess_sentences, build_graph, get_n_words
 
@@ -45,30 +44,27 @@ class ReportsGenerator:
         cleaned_text = preprocess_sentences(original_sentences)
         return self.sentence_transformer.encode(cleaned_text)
 
-    def _get_hdbscan_clusters(self, embeddings):
+    def _get_clusters(self, embeddings):
         """
         1 - Get embeddings of tweets
         2 - Data reduction algorithm: UMAP if we have too many sentences to cluster
         3 - HDBscan clustering
         """
         n_rows = embeddings.shape[0]
-        if n_rows <= 10:
-            return np.ones(n_rows)
+        if n_rows <= 20:
+            n_clusters = 2
+        elif n_rows <= 100:
+            n_clusters = n_rows // 15
+        elif n_rows <= 200:
+            n_clusters = n_rows // 20
         else:
-            # if too many sentence, apply dimentianality reduction to embedings
-            if n_rows > 100:
-                reduced_embeddings = umap.UMAP(
-                    n_neighbors=7, n_components=15, metric="cosine"
-                ).fit_transform(embeddings)
-            else:
-                reduced_embeddings = embeddings
+            n_clusters = min(n_rows // 40, 10)
 
-            # Hdbscan
-            cluster = hdbscan.HDBSCAN(
-                min_cluster_size=10, metric="euclidean", cluster_selection_method="eom"
-            ).fit(reduced_embeddings)
+        # Clustering
+        clustering_algo = MiniBatchKMeans(n_clusters=n_clusters)
+        clusters = clustering_algo.fit(embeddings)
 
-            return cluster.labels_
+        return clusters.labels_
 
     def _summarize_one_cluster(
         self,
@@ -105,7 +101,7 @@ class ReportsGenerator:
         )
 
         # set max cluster summary length
-        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) - 1
+        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) + 1
         max_length_one_cluster = (
             128 if max_length_one_cluster > 128 else max_length_one_cluster
         )
@@ -113,7 +109,6 @@ class ReportsGenerator:
         # summarize selected sentences
         summarized_entries = self.summarization_model(
             ranked_sentences,
-            min_length=1,
             max_length=max_length_one_cluster,
             truncation=True,
         )[0]["summary_text"]
@@ -153,26 +148,28 @@ class ReportsGenerator:
                     )
                 )
 
-        return " ".join(summarized_entries_per_cluster)
+        return summarized_entries_per_cluster
 
-    def _summarization_iteration(self, entries_as_str: str) -> str:
+    def _summarization_iteration(self, entries: Union[str, List[str]]) -> List[str]:
 
         # Get embeddings
-        entries_as_sentences = sent_tokenize(entries_as_str)
-        entries_embeddings = self._get_sentences_embeddings(entries_as_sentences)
+        if type(entries) is str:
+            entries = sent_tokenize(entries)
+
+        entries_embeddings = self._get_sentences_embeddings(entries)
 
         # Get clusters
-        cluster_labels = self._get_hdbscan_clusters(entries_embeddings)
+        cluster_labels = self._get_clusters(entries_embeddings)
         n_clusters = len(list(set(cluster_labels)))
 
         if n_clusters == 1:
-            summarized_entries = self._summarize_one_cluster(
-                entries_as_sentences, entries_embeddings
-            )
+            summarized_entries = [
+                self._summarize_one_cluster(entries, entries_embeddings)
+            ]
 
         else:
             summarized_entries = self._multiclusters_summarization(
-                entries_as_sentences=entries_as_sentences,
+                entries=entries,
                 entries_embeddings=entries_embeddings,
                 cluster_labels=cluster_labels,
             )
@@ -232,4 +229,4 @@ class ReportsGenerator:
                 "Warning... Maximum number of iterations reached but summarized text length is still longer than the max_length, returning the long summarized version."
             )
 
-        return summarized_text
+        return " ".join(summarized_text)
