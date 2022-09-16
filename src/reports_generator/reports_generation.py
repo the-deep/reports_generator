@@ -51,7 +51,9 @@ class ReportsGenerator:
         3 - HDBscan clustering
         """
         n_rows = embeddings.shape[0]
-        if n_rows <= 20:
+        if n_rows < 3:
+            n_clusters = 1
+        elif n_rows <= 20:
             n_clusters = 2
         elif n_rows <= 100:
             n_clusters = n_rows // 15
@@ -60,11 +62,13 @@ class ReportsGenerator:
         else:
             n_clusters = min(n_rows // 40, 10)
 
-        # Clustering
-        clustering_algo = MiniBatchKMeans(n_clusters=n_clusters)
-        clusters = clustering_algo.fit(embeddings)
-
-        return clusters.labels_
+        if n_clusters == 1:
+            return np.ones(n_rows)
+        else:
+            # Clustering
+            clustering_algo = MiniBatchKMeans(n_clusters=n_clusters)
+            clusters = clustering_algo.fit(embeddings)
+            return clusters.labels_
 
     def _summarize_one_cluster(
         self,
