@@ -23,11 +23,11 @@ class RepGen:
 
         df = pd.read_csv(csv_data)
         try:
-            assert ['id', 'original_text', 'groundtruth_labels'] == df.columns.to_list()
+            assert {'id', 'original_text', 'groundtruth_labels'} == set(df.columns)
         except AssertionError:
             raise HTTPException(
                 status_code=500,
-                detail="Assertion faied on csv column names"
+                detail="Assertion failed on csv column names"
             )
 
         labels_list = df.groundtruth_labels.unique()
