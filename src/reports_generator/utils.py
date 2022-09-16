@@ -2,7 +2,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-from typing import List
+from typing import List, Union
 import networkx as nx
 import re
 import nltk
@@ -90,8 +90,18 @@ def preprocess_sentences(all_tweets: List[str]):
     return [preprocess_one_sentence(one_tweet) for one_tweet in all_tweets]
 
 
-def get_n_words(text):
+def get_n_words_per_str(text: str):
     """
     Simple method to approximate the number of words in text.
     """
     return len(text.split(" "))
+
+
+def get_n_words(entries: Union[str, List[str]]):
+    """
+    Simple method to approximate the number of words in text or list of texts.
+    """
+    if type(entries) is str:
+        return get_n_words_per_str(entries)
+    else:
+        return sum([get_n_words_per_str(one_text) for one_text in entries])
