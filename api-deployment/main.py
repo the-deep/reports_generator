@@ -1,7 +1,8 @@
 from typing import Optional
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
+
 
 from summarizer import RepGen
 
@@ -27,7 +28,10 @@ def gen_report(item: Excerpt):
     elif item.excerpts:
         input_data = item.excerpts
     else:
-        return {"error": "Invalid request body"}
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid request body"
+        )
 
     generated_report = repgen(input_data)
     return {
