@@ -105,7 +105,7 @@ class ReportsGenerator:
         )
 
         # set max cluster summary length
-        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) - 1
+        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) + 1
         if max_length_one_cluster > 128:
             max_length_one_cluster = 128
 
@@ -207,10 +207,10 @@ class ReportsGenerator:
                 "argument 'entries' must be one of the types [str, List[str]]"
             )
 
-        if get_n_words(entries_as_str) < 15:
-            n_words = get_n_words(entries_as_str)
+        n_words = get_n_words(entries_as_str) + 1
+        if n_words < 20:
             AssertionError(
-                f"The minimum number of words in the input is 15 but yours is shorter ({n_words}), please provide a longer input text."
+                f"The minimum number of words in the input is 20 but yours is shorter ({n_words}), please provide a longer input text."
             )
 
         n_raw_text_words = get_n_words(entries_as_str)
