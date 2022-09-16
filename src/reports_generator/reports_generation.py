@@ -108,8 +108,8 @@ class ReportsGenerator:
         max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) - 1
         if max_length_one_cluster > 128:
             max_length_one_cluster = 128
-        if max_length_one_cluster < 5:
-            max_length_one_cluster = 5
+        if max_length_one_cluster < 56:
+            max_length_one_cluster = 56
 
         # summarize selected sentences
         summarized_entries = self.summarization_model(
