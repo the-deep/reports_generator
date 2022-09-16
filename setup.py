@@ -13,13 +13,10 @@ setup(
     include_package_data=True,
     # Needed for dependencies
     install_requires=[
-        "hdbscan>=0.8.28",
         "networkx>=2.0",
         "nltk>=3.7",
         "sentence_transformers>=2.2.2",
         "transformers>=4.9.2",
-        "umap>=0.1.1",
-        "umap_learn>=0.5.3",
     ],
     # *strongly* suggested for sharing
     version="0.2",
