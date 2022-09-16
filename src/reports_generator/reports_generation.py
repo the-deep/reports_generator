@@ -114,7 +114,7 @@ class ReportsGenerator:
         # summarize selected sentences
         summarized_entries = self.summarization_model(
             ranked_sentences,
-            min_length=2
+            min_length=2,
             max_length=max_length_one_cluster,
             truncation=True,
         )[0]["summary_text"]
