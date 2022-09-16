@@ -175,7 +175,7 @@ class ReportsGenerator:
 
         else:
             summarized_entries = self._multiclusters_summarization(
-                entries=entries,
+                entries_as_sentences=entries,
                 entries_embeddings=entries_embeddings,
                 cluster_labels=cluster_labels,
             )
