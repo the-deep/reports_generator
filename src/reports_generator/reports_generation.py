@@ -1,8 +1,4 @@
-from logging import warning
 import warnings
-
-warnings.filterwarnings("ignore")
-
 from typing import List
 from collections import defaultdict
 import networkx as nx
