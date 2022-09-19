@@ -5,24 +5,43 @@ import networkx as nx
 from typing import List, Union
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import MiniBatchKMeans
+
+import torch
 
 from transformers import pipeline
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import AutoModel, AutoTokenizer
 from nltk.tokenize import sent_tokenize
 import nltk
 
 nltk.download("punkt")
-from sklearn.cluster import MiniBatchKMeans
 
 from .utils import preprocess_sentences, build_graph, get_n_words
+from .pooling import Pooling
+
+POSSIBLE_LANGUAGES = ["en", "fr"]
 
 
 class ReportsGenerator:
     def __init__(
         self,
-        summarization_model_name: str = "sshleifer/distilbart-cnn-12-6",
-        sentence_embedding_model_name: str = "sentence-transformers/all-distilroberta-v1",
+        input_language: str,
+        en_summarization_model_name: str = "sshleifer/distilbart-cnn-12-6",
+        fr_summarization_model_name: str = "plguillou/t5-base-fr-sum-cnndm",
+        sentence_embedding_model_name: str = "nreimers/mMiniLMv2-L6-H384-distilled-from-XLMR-Large",
+        sentence_embedding_output_length: int = 384,
     ):
+        assert (
+            input_language in POSSIBLE_LANGUAGES
+        ), f"'input_language' parameter must be one of {POSSIBLE_LANGUAGES}."
+        self.input_language = input_language
+
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        if input_language == "en":
+            summarization_model_name = en_summarization_model_name
+        elif input_language == "fr":
+            summarization_model_name = fr_summarization_model_name
 
         self.summarization_model = pipeline(
             "summarization",
@@ -30,8 +49,18 @@ class ReportsGenerator:
             tokenizer=summarization_model_name,
             # device=self.device,
         )
-        self.sentence_transformer = SentenceTransformer(
-            sentence_embedding_model_name,  # device=self.device
+
+        self.embeddings_model = AutoModel.from_pretrained(sentence_embedding_model_name)
+        self.embeddings_tokenizer = AutoTokenizer.from_pretrained(
+            sentence_embedding_model_name
+        )
+
+        self.pool = Pooling(
+            word_embedding_dimension=sentence_embedding_output_length,
+            pooling_mode_mean_tokens=False,
+            pooling_mode_cls_token=False,
+            pooling_mode_max_tokens=True,
+            pooling_mode_mean_sqrt_len_tokens=False,
         )
 
     def _get_sentences_embeddings(self, original_sentences):
@@ -39,7 +68,29 @@ class ReportsGenerator:
         get all tweets embeddings, one embedding per sentence
         """
         cleaned_text = preprocess_sentences(original_sentences)
-        return self.sentence_transformer.encode(cleaned_text)
+
+        inputs = self.embeddings_tokenizer(
+            cleaned_text,
+            None,
+            truncation=True,
+            add_special_tokens=True,
+            max_length=40,
+            padding="max_length",
+            return_token_type_ids=True,
+        )
+        transformer_output = self.common_backbone(
+            inputs["input_ids"].to(self.device),
+            attention_mask=inputs["attention_mask"].to(self.device),
+        ).last_hidden_state.cpu()
+
+        pooled_output = self.pool(
+            {
+                "token_embeddings": transformer_output,
+                "attention_mask": inputs["attention_mask"],
+            }
+        )["sentence_embedding"]
+
+        return pooled_output
 
     def _get_clusters(self, embeddings):
         """
@@ -203,12 +254,12 @@ class ReportsGenerator:
         n_words = get_n_words(entries_as_str) + 1
         if n_words < 20:
             warnings.warn(
-                f"The minimum number of words in the input is 20 but yours is shorter ({n_words}). No summary has been generated and the output is an empty string. Please provide a longer input text for a good quality summary."
+                f"Warning... The minimum number of words in the input is 20 but yours is shorter ({n_words}). No summary has been generated and the output is an empty string. Please provide a longer input text for a good quality summary."
             )
 
         if len(sent_tokenize(entries_as_str)) < 2:
             warnings.warn(
-                "The minimum number of input sentences must be at least 2 but your input consists of only one sentence. No summary has been generated and the output is an empty string. Please provide at least one more sentence for a good quality summary."
+                "Warning... The minimum number of input sentences must be at least 2 but your input consists of only one sentence. No summary has been generated and the output is an empty string. Please provide at least one more sentence for a good quality summary."
             )
 
         n_raw_text_words = get_n_words(entries_as_str)
