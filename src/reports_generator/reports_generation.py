@@ -27,6 +27,16 @@ class ReportsGenerator:
         sentence_embedding_model_name: str = "nreimers/mMiniLMv2-L6-H384-distilled-from-XLMR-Large",
         sentence_embedding_output_length: int = 384,
     ):
+        """
+        Args:
+            - summarization_model_name: generic summarization model from HuggingFace Summarization pipeline
+            ( https://huggingface.co/models?pipeline_tag=summarization&sort=downloads )
+
+            - sentence_embedding_model_name: multilingual model, used to get the sentence embeddings
+            ( https://huggingface.co/models?pipeline_tag=fill-mask&sort=downloads )
+
+            - sentence_embedding_output_length: output length of 'sentence_embedding_output_length' embeddings
+        """
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.summarization_model = pipeline(
