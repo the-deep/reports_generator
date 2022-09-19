@@ -19,29 +19,15 @@ nltk.download("punkt")
 from .utils import preprocess_sentences, build_graph, get_n_words
 from .pooling import Pooling
 
-POSSIBLE_LANGUAGES = ["en", "fr"]
-
 
 class ReportsGenerator:
     def __init__(
         self,
-        input_language: str,
-        en_summarization_model_name: str = "sshleifer/distilbart-cnn-12-6",
-        fr_summarization_model_name: str = "plguillou/t5-base-fr-sum-cnndm",
+        summarization_model_name: str = "csebuetnlp/mT5_multilingual_XLSum",
         sentence_embedding_model_name: str = "nreimers/mMiniLMv2-L6-H384-distilled-from-XLMR-Large",
         sentence_embedding_output_length: int = 384,
     ):
-        assert (
-            input_language in POSSIBLE_LANGUAGES
-        ), f"'input_language' parameter must be one of {POSSIBLE_LANGUAGES}."
-        self.input_language = input_language
-
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        if input_language == "en":
-            summarization_model_name = en_summarization_model_name
-        elif input_language == "fr":
-            summarization_model_name = fr_summarization_model_name
 
         self.summarization_model = pipeline(
             "summarization",
@@ -149,14 +135,14 @@ class ReportsGenerator:
         )
 
         # set max cluster summary length
-        max_length_one_cluster = (len(ranked_sentences.split(" ")) // 2) + 1
-        if max_length_one_cluster > 128:
-            max_length_one_cluster = 128
+        n_words = get_n_words(ranked_sentences)
+        max_length_one_cluster = min(n_words // 2, 128)
+        min_length_one_cluster = min(n_words // 4, 56)
 
         # summarize selected sentences
         summarized_entries = self.summarization_model(
             ranked_sentences,
-            min_length=1,
+            min_length=min_length_one_cluster,
             max_length=max_length_one_cluster,
             truncation=True,
         )[0]["summary_text"]
