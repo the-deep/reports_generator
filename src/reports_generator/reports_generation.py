@@ -1,3 +1,4 @@
+from logging import warning
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -51,12 +52,8 @@ class ReportsGenerator:
         3 - HDBscan clustering
         """
         n_rows = embeddings.shape[0]
-        if n_rows < 3:
-            n_clusters = 1
-        elif n_rows <= 20:
-            n_clusters = 2
-        elif n_rows <= 100:
-            n_clusters = n_rows // 15
+        if n_rows <= 100:
+            n_clusters = (n_rows // 15) + 1
         elif n_rows <= 200:
             n_clusters = n_rows // 20
         else:
@@ -144,7 +141,7 @@ class ReportsGenerator:
         summarized_entries_per_cluster = []
         for one_cluster_specifics in dict_grouped_excerpts.values():
             n_sentences_one_cluster = len(one_cluster_specifics["sentences"])
-            if n_sentences_one_cluster > 10:
+            if n_sentences_one_cluster > 1:
                 summarized_entries_per_cluster.append(
                     self._summarize_one_cluster(
                         one_cluster_specifics["sentences"],
@@ -208,12 +205,15 @@ class ReportsGenerator:
             )
 
         n_words = get_n_words(entries_as_str) + 1
-        assert (
-            n_words > 20
-        ), f"The minimum number of words in the input is 20 but yours is shorter ({n_words}), please provide a longer input text."
-        assert (
-            len(sent_tokenize(entries_as_str)) > 1
-        ), "The minimum number of input sentences must be at least 2."
+        if n_words < 20:
+            warnings.warn(
+                f"The minimum number of words in the input is 20 but yours is shorter ({n_words}). No summary has been generated and the output is an empty string. Please provide a longer input text for a good quality summary."
+            )
+
+        if len(sent_tokenize(entries_as_str)) < 2:
+            warnings.warn(
+                "The minimum number of input sentences must be at least 2 but your input consists of only one sentence. No summary has been generated and the output is an empty string. Please provide at least one more sentence for a good quality summary."
+            )
 
         n_raw_text_words = get_n_words(entries_as_str)
         if n_raw_text_words < max_summary_length:
