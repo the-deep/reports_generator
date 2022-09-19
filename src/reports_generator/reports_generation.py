@@ -212,7 +212,7 @@ class ReportsGenerator:
             n_words > 20
         ), f"The minimum number of words in the input is 20 but yours is shorter ({n_words}), please provide a longer input text."
         assert (
-            len(sent_tokenize(entries)) > 1
+            len(sent_tokenize(entries_as_str)) > 1
         ), "The minimum number of input sentences must be at least 2."
 
         n_raw_text_words = get_n_words(entries_as_str)
