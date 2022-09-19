@@ -8,6 +8,8 @@ from summarizer import RepGen
 
 
 app = FastAPI()
+v1 = FastAPI()
+
 repgen = RepGen()
 
 
@@ -21,7 +23,7 @@ def home():
     return "Welcome to FastAPI for Reports Generator from DEEP NLP"
 
 
-@app.post("/generate_report")
+@v1.post("/generate_report")
 def gen_report(item: Excerpt):
     if item.excerpt:
         input_data = item.excerpt
@@ -39,7 +41,7 @@ def gen_report(item: Excerpt):
     }
 
 
-@app.post("/uploadfile")
+@v1.post("/uploadfile")
 def gen_report_from_file(
     csv_file: UploadFile = File(
         description="Note: Column names must be id, original_text, groundtruth_labels"
@@ -51,3 +53,5 @@ def gen_report_from_file(
     return {
         "output": generated_report
     }
+
+app.mount("/api/v1", v1)
