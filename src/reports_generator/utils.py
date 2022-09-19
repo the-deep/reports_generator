@@ -12,14 +12,6 @@ nltk.download("wordnet")
 nltk.download("omw-1.4")
 from nltk.corpus import stopwords
 
-from nltk.stem import WordNetLemmatizer
-
-wordnet_lemmatizer = WordNetLemmatizer()
-
-from nltk.stem import PorterStemmer
-
-porter_stemmer = PorterStemmer()
-stop_words = set(stopwords.words())
 stop_words = set(stopwords.words())
 
 
@@ -71,13 +63,6 @@ def preprocess_one_sentence(sentence):
         bool_word_not_stop_word = new_word.lower() not in stop_words
 
         if bool_word_not_empty_string and bool_word_not_stop_word:
-
-            # lemmatize
-            new_word = wordnet_lemmatizer.lemmatize(new_word, pos="v")
-
-            # stem
-            new_word = porter_stemmer.stem(new_word)
-
             new_words.append(new_word)
 
     return " ".join(new_words).rstrip().lstrip()
