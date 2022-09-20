@@ -73,7 +73,7 @@ class ReportsGenerator:
             padding="max_length",
             return_token_type_ids=True,
         )
-        transformer_output = self.common_backbone(
+        transformer_output = self.embeddings_model(
             inputs["input_ids"].to(self.device),
             attention_mask=inputs["attention_mask"].to(self.device),
         ).last_hidden_state.cpu()
