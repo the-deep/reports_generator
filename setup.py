@@ -15,7 +15,6 @@ setup(
     install_requires=[
         "networkx>=2.0",
         "nltk>=3.7",
-        "sentence_transformers>=2.2.2",
         "transformers>=4.9.2",
     ],
     # *strongly* suggested for sharing
