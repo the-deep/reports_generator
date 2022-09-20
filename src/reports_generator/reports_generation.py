@@ -79,12 +79,16 @@ class ReportsGenerator:
             attention_mask=inputs["attention_mask"].to(self.device),
         ).last_hidden_state.cpu()
 
-        pooled_output = self.pool(
-            {
-                "token_embeddings": transformer_output,
-                "attention_mask": inputs["attention_mask"],
-            }
-        )["sentence_embedding"]
+        pooled_output = (
+            self.pool(
+                {
+                    "token_embeddings": transformer_output,
+                    "attention_mask": inputs["attention_mask"],
+                }
+            )["sentence_embedding"]
+            .detach()
+            .numpy()
+        )
 
         return pooled_output
 
