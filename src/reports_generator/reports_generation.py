@@ -9,8 +9,7 @@ from sklearn.cluster import MiniBatchKMeans
 
 import torch
 
-from transformers import pipeline
-from sentence_transformers import AutoModel, AutoTokenizer
+from transformers import pipeline, AutoModel, AutoTokenizer
 from nltk.tokenize import sent_tokenize
 import nltk
 
