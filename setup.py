@@ -16,6 +16,7 @@ setup(
         "networkx>=2.0",
         "nltk>=3.7",
         "transformers>=4.9.2",
+        "sentencepiece",
     ],
     # *strongly* suggested for sharing
     version="0.2",
