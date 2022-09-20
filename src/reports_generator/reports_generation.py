@@ -72,12 +72,11 @@ class ReportsGenerator:
             max_length=40,
             padding="max_length",
             return_token_type_ids=True,
+            return_tensors="pt",
         )
         transformer_output = self.embeddings_model(
-            torch.tensor(inputs["input_ids"], dtype=torch.long).to(self.device),
-            attention_mask=torch.tensor(inputs["attention_mask"], dtype=torch.long).to(
-                self.device
-            ),
+            inputs["input_ids"].to(self.device),
+            attention_mask=inputs["attention_mask"].to(self.device),
         ).last_hidden_state.cpu()
 
         pooled_output = self.pool(
