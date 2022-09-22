@@ -5,8 +5,20 @@ import pandas as pd
 
 
 class RepGen:
-    def __init__(self):
-        self.summarizer = ReportsGenerator()
+    EN = 'en'
+    FR = 'fr'
+
+    def __init__(self, language):
+        if language == RepGen.EN:
+            self.summarizer = ReportsGenerator(
+                summarization_model_name="sshleifer/distilbart-cnn-12-6"
+            )
+        elif language == RepGen.FR:
+            self.summarizer = ReportsGenerator(
+                summarization_model_name="plguillou/t5-base-fr-sum-cnndm"
+            )
+        else:
+            self.summarizer = ReportsGenerator()
 
     def __call__(self, data):
         try:
