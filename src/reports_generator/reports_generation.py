@@ -236,7 +236,7 @@ class ReportsGenerator:
     def __call__(
         self,
         entries: Union[str, List[str]],
-        max_iterations: int = 3,
+        max_iterations: int,
         # max_summary_length: int = 384,
     ) -> str:
         """
