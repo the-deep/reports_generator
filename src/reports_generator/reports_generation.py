@@ -23,7 +23,7 @@ class ReportsGenerator:
     def __init__(
         self,
         summarization_model_name: str = "csebuetnlp/mT5_multilingual_XLSum",
-        sentence_embedding_model_name: str = "nreimers/mMiniLMv2-L6-H384-distilled-from-XLMR-Large",
+        sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         sentence_embedding_output_length: int = 384,
     ):
         """
@@ -52,7 +52,7 @@ class ReportsGenerator:
 
         self.pool = Pooling(
             word_embedding_dimension=sentence_embedding_output_length,
-            pooling_mode_mean_tokens=False,
+            pooling_mode_mean_tokens=True,
             pooling_mode_cls_token=False,
             pooling_mode_max_tokens=True,
             pooling_mode_mean_sqrt_len_tokens=False,
@@ -74,10 +74,11 @@ class ReportsGenerator:
             return_token_type_ids=True,
             return_tensors="pt",
         )
-        transformer_output = self.embeddings_model(
-            inputs["input_ids"].to(self.device),
-            attention_mask=inputs["attention_mask"].to(self.device),
-        ).last_hidden_state.cpu()
+        with torch.no_grad():
+            transformer_output = self.embeddings_model(
+                inputs["input_ids"].to(self.device),
+                attention_mask=inputs["attention_mask"].to(self.device),
+            ).last_hidden_state.cpu()
 
         pooled_output = (
             self.pool(
@@ -100,9 +101,9 @@ class ReportsGenerator:
         """
         n_rows = embeddings.shape[0]
         if n_rows <= 100:
-            n_clusters = (n_rows // 15) + 1
+            n_clusters = (n_rows // 10) + 1
         elif n_rows <= 200:
-            n_clusters = n_rows // 20
+            n_clusters = (n_rows // 15) + 1
         else:
             n_clusters = min(n_rows // 40, 10)
 
@@ -185,10 +186,11 @@ class ReportsGenerator:
             )
 
         # summarize each cluster.
+        n_min_sentences_for_summarization = 2
         summarized_entries_per_cluster = []
         for one_cluster_specifics in dict_grouped_excerpts.values():
             n_sentences_one_cluster = len(one_cluster_specifics["sentences"])
-            if n_sentences_one_cluster > 1:
+            if n_sentences_one_cluster >= n_min_sentences_for_summarization:
                 summarized_entries_per_cluster.append(
                     self._summarize_one_cluster(
                         one_cluster_specifics["sentences"],
