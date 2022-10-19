@@ -18,6 +18,9 @@ nltk.download("punkt")
 from .utils import preprocess_sentences, build_graph, get_n_words
 from .pooling import Pooling
 
+n_min_sentences_for_summarization = 3
+n_min_words_for_summarization = 20
+
 
 class ReportsGenerator:
     def __init__(
@@ -151,16 +154,17 @@ class ReportsGenerator:
 
         # set max cluster summary length
         n_words = get_n_words(ranked_sentences)
-        max_length_one_cluster = min(n_words // 2, 128)
+        max_length_one_cluster = min(max(n_words // 2, 10), 128)  # 10 < max words < 128
         min_length_one_cluster = min(n_words // 4, 56)
 
-        # summarize selected sentences
-        summarized_entries = self.summarization_model(
-            ranked_sentences,
-            min_length=min_length_one_cluster,
-            max_length=max_length_one_cluster,
-            truncation=True,
-        )[0]["summary_text"]
+        if max_length_one_cluster > 10:  # TODO: fix max len pb
+            # summarize selected sentences
+            summarized_entries = self.summarization_model(
+                ranked_sentences,
+                min_length=min_length_one_cluster,
+                max_length=max_length_one_cluster,
+                truncation=True,
+            )[0]["summary_text"]
 
         return summarized_entries
 
@@ -186,15 +190,10 @@ class ReportsGenerator:
             )
 
         # summarize each cluster.
-        n_min_sentences_for_summarization = 3
-        n_min_words_for_summarization = 20
-
         summarized_entries_per_cluster = []
         for one_cluster_specifics in dict_grouped_excerpts.values():
             n_sentences_one_cluster = len(one_cluster_specifics["sentences"])
-            n_words_one_cluster = get_n_words(
-                " ".join(one_cluster_specifics["sentences"])
-            )
+            n_words_one_cluster = get_n_words(one_cluster_specifics["sentences"])
             if (
                 n_sentences_one_cluster >= n_min_sentences_for_summarization
                 and n_words_one_cluster >= n_min_words_for_summarization
@@ -221,6 +220,7 @@ class ReportsGenerator:
         n_clusters = len(list(set(cluster_labels)))
 
         if n_clusters == 1:
+
             summarized_entries = [
                 self._summarize_one_cluster(entries, entries_embeddings)
             ]
