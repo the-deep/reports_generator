@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "scikit-learn>=1.0.2",
         "torch>=1.12.1",
-        "protobuf==3.19",
+        "protobuf==3.19.5",
         "networkx>=2.0",
         "nltk>=3.7",
         "transformers>=4.9.2",
