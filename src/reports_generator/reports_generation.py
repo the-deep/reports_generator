@@ -18,8 +18,7 @@ nltk.download("punkt")
 from .utils import preprocess_sentences, build_graph, get_n_words
 from .pooling import Pooling
 
-n_min_sentences_for_summarization = 3
-n_min_words_for_summarization = 20
+n_min_sentences_for_summarization = 2
 
 
 class ReportsGenerator:
@@ -193,11 +192,7 @@ class ReportsGenerator:
         summarized_entries_per_cluster = []
         for one_cluster_specifics in dict_grouped_excerpts.values():
             n_sentences_one_cluster = len(one_cluster_specifics["sentences"])
-            n_words_one_cluster = get_n_words(one_cluster_specifics["sentences"])
-            if (
-                n_sentences_one_cluster >= n_min_sentences_for_summarization
-                and n_words_one_cluster >= n_min_words_for_summarization
-            ):
+            if n_sentences_one_cluster >= n_min_sentences_for_summarization:
                 summarized_entries_per_cluster.append(
                     self._summarize_one_cluster(
                         one_cluster_specifics["sentences"],
