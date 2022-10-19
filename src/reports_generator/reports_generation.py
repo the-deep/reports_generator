@@ -237,7 +237,7 @@ class ReportsGenerator:
         self,
         entries: Union[str, List[str]],
         max_iterations: int = 3,
-        max_summary_length: int = 384,
+        # max_summary_length: int = 384,
     ) -> str:
         """
         Args:
@@ -271,30 +271,31 @@ class ReportsGenerator:
                 "Warning... The minimum number of input sentences must be at least 2 but your input consists of only one sentence. No summary has been generated and the output is an empty string. Please provide at least one more sentence for a good quality summary."
             )
 
-        n_raw_text_words = get_n_words(entries_as_str)
+        """n_raw_text_words = get_n_words(entries_as_str)
         if n_raw_text_words < max_summary_length:
             max_summary_length = (n_raw_text_words // 2) - 1
             max_iterations = 1
             warnings.warn(
                 f"Warning... The length of the original text is smaller than the maximum summary length, setting 'max_iterations' parameter to 1 and the 'max_summary_length' to {max_summary_length}."
-            )
+            )"""
 
         summarized_text = self._summarization_iteration(entries_as_str)
         n_iterations = 1
 
         while (
-            get_n_words(summarized_text) > max_summary_length
-            and n_iterations < max_iterations
+            n_iterations
+            < max_iterations
+            # and get_n_words(summarized_text) > max_summary_length
         ):
             summarized_text = self._summarization_iteration(summarized_text)
             n_iterations += 1
 
-        if (
+        """if (
             n_iterations == max_iterations
             and get_n_words(summarized_text) > max_summary_length
         ):
             warnings.warn(
                 "Warning... Maximum number of iterations reached but summarized text length is still longer than the max_length, returning the long summarized version."
-            )
+            )"""
 
         return " ".join(summarized_text)
