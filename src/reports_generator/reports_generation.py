@@ -186,7 +186,7 @@ class ReportsGenerator:
             )
 
         # summarize each cluster.
-        n_min_sentences_for_summarization = 2
+        n_min_sentences_for_summarization = 3
         summarized_entries_per_cluster = []
         for one_cluster_specifics in dict_grouped_excerpts.values():
             n_sentences_one_cluster = len(one_cluster_specifics["sentences"])
