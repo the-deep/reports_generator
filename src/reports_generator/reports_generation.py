@@ -47,7 +47,9 @@ class ReportsGenerator:
             # device=self.device,
         )
 
-        self.embeddings_model = AutoModel.from_pretrained(sentence_embedding_model_name)
+        self.embeddings_model = AutoModel.from_pretrained(
+            sentence_embedding_model_name
+        ).to(self.device)
         self.embeddings_tokenizer = AutoTokenizer.from_pretrained(
             sentence_embedding_model_name
         )
