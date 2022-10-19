@@ -155,16 +155,19 @@ class ReportsGenerator:
 
         # set max cluster summary length
         n_words = get_n_words(ranked_sentences)
-        max_length_one_cluster = min(max(n_words // 2, 10), 128)  # 10 < max words < 128
+        max_length_one_cluster = min(n_words // 2, 128)  # 10 < max words < 128
         min_length_one_cluster = min(n_words // 4, 56)
 
         # summarize selected sentences
-        summarized_entries = self.summarization_model(
-            ranked_sentences,
-            min_length=min_length_one_cluster,
-            max_length=max_length_one_cluster,
-            truncation=True,
-        )[0]["summary_text"]
+        try:
+            summarized_entries = self.summarization_model(
+                ranked_sentences,
+                min_length=min_length_one_cluster,
+                max_length=max_length_one_cluster,
+                truncation=True,
+            )[0]["summary_text"]
+        except Exception:  # case where input is too short
+            summarized_entries = ""
 
         return summarized_entries
 
