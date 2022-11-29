@@ -13,7 +13,7 @@ setup(
     include_package_data=True,
     # Needed for dependencies
     install_requires=[
-        "scikit-learn>=1.0.2",
+        "scikit-learn>=0.24.2",
         "torch>=1.12.1",
         "protobuf==3.19.5",
         "networkx>=2.0",
