@@ -73,7 +73,7 @@ class ReportsGenerator:
             None,
             truncation=True,
             add_special_tokens=True,
-            max_length=512,
+            max_length=64,  # per sentence
             padding="max_length",
             return_tensors="pt",
         )
