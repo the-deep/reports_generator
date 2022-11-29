@@ -14,7 +14,7 @@ setup(
     # Needed for dependencies
     install_requires=[
         "scikit-learn>=0.24.2",
-        "torch>=1.12.1",
+        "torch>=1.10.2",
         "protobuf==3.19.5",
         "networkx>=2.0",
         "nltk>=3.7",
