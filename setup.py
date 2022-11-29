@@ -17,7 +17,7 @@ setup(
         "torch>=1.10.2",
         "protobuf==3.19.5",
         "networkx>=2.0",
-        "nltk>=3.7",
+        "nltk>=3.6.7",
         "transformers>=4.9.2",
         "sentencepiece",
     ],
