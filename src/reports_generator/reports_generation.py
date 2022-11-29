@@ -73,9 +73,8 @@ class ReportsGenerator:
             None,
             truncation=True,
             add_special_tokens=True,
-            max_length=128,
+            max_length=512,
             padding="max_length",
-            return_token_type_ids=True,
             return_tensors="pt",
         )
         with torch.no_grad():
