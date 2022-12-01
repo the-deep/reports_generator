@@ -104,11 +104,11 @@ class ReportsGenerator:
         """
         n_rows = embeddings.shape[0]
         if n_rows <= 100:
-            n_clusters = (n_rows // 10) + 1
+            n_clusters = (n_rows // 5) + 1
         elif n_rows <= 200:
-            n_clusters = (n_rows // 15) + 1
+            n_clusters = (n_rows // 10) + 1
         else:
-            n_clusters = min(n_rows // 40, 10)
+            n_clusters = min(n_rows // 20, 10)
 
         if n_clusters == 1:
             return np.ones(n_rows)
