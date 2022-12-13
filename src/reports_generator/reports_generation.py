@@ -25,8 +25,7 @@ class ReportsGenerator:
     def __init__(
         self,
         summarization_model_name: str = "csebuetnlp/mT5_multilingual_XLSum",
-        sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        sentence_embedding_output_length: int = 384,
+        sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     ):
         """
         Args:
@@ -35,8 +34,6 @@ class ReportsGenerator:
 
             - sentence_embedding_model_name: multilingual model, used to get the sentence embeddings
             ( https://huggingface.co/models?pipeline_tag=fill-mask&sort=downloads )
-
-            - sentence_embedding_output_length: output length of 'sentence_embedding_output_length' embeddings
         """
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -55,7 +52,7 @@ class ReportsGenerator:
         )
 
         self.pool = Pooling(
-            word_embedding_dimension=sentence_embedding_output_length,
+            word_embedding_dimension=self.embeddings_model.config.hidden_size,
             pooling_mode_mean_tokens=True,
             pooling_mode_cls_token=False,
             pooling_mode_max_tokens=True,
@@ -238,18 +235,18 @@ class ReportsGenerator:
     def __call__(
         self,
         entries: Union[str, List[str]],
-        max_iterations: int = 2,
+        n_iterations: int = 2,
     ) -> str:
         """
         Args:
             - entries: text to be summarized, either as a form of a list of sentences or paragraph.
-            - max_iterations: int: maximum number of iterations to be performed while summarizing
+            - n_iterations: int: number of iterations to be performed while summarizing
         """
 
         assert (
-            max_iterations is not int
-        ), "'max_iterations' parameter must be an integer."
-        assert max_iterations >= 1, "'max_iterations' parameter must >= 1."
+            n_iterations is not int
+        ), "'n_iterations' parameter must be an integer."
+        assert n_iterations >= 1, "'n_iterations' parameter must >= 1."
 
         if type(entries) is list:
             entries_as_str = " ".join([str(one_entry) for one_entry in entries])
@@ -274,7 +271,7 @@ class ReportsGenerator:
         summarized_text = self._summarization_iteration(entries_as_str)
         n_iterations = 1
 
-        while n_iterations < max_iterations:
+        while n_iterations < n_iterations:
             summarized_text = self._summarization_iteration(summarized_text)
             n_iterations += 1
 
