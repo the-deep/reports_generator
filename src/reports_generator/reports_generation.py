@@ -25,7 +25,7 @@ class ReportsGenerator:
     def __init__(
         self,
         summarization_model_name: str = "csebuetnlp/mT5_multilingual_XLSum",
-        sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
     ):
         """
         Args:
@@ -243,9 +243,7 @@ class ReportsGenerator:
             - n_iterations: int: number of iterations to be performed while summarizing
         """
 
-        assert (
-            n_iterations is not int
-        ), "'n_iterations' parameter must be an integer."
+        assert n_iterations is not int, "'n_iterations' parameter must be an integer."
         assert n_iterations >= 1, "'n_iterations' parameter must >= 1."
 
         if type(entries) is list:
@@ -269,10 +267,10 @@ class ReportsGenerator:
             )
 
         summarized_text = self._summarization_iteration(entries_as_str)
-        n_iterations = 1
+        n_done_iterations = 1
 
-        while n_iterations < n_iterations:
+        while n_done_iterations < n_iterations:
             summarized_text = self._summarization_iteration(summarized_text)
-            n_iterations += 1
+            n_done_iterations += 1
 
         return " ".join(summarized_text)
