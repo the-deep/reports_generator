@@ -29,6 +29,7 @@ class ReportsGenerator:
         self,
         summarization_model_name: str = "csebuetnlp/mT5_multilingual_XLSum",
         sentence_embedding_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        device: str = "cpu",
     ):
         """
         Args:
@@ -38,13 +39,13 @@ class ReportsGenerator:
             - sentence_embedding_model_name: multilingual model, used to get the sentence embeddings
             ( https://huggingface.co/models?pipeline_tag=fill-mask&sort=downloads )
         """
-        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
 
         self.summarization_model = pipeline(
             "summarization",
             model=summarization_model_name,
             tokenizer=summarization_model_name,
-            # device=self.device,
+            device=self.device,
         )
 
         self.embeddings_model = AutoModel.from_pretrained(
