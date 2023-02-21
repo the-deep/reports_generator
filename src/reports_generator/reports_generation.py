@@ -7,16 +7,19 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import MiniBatchKMeans
 
-import torch
+# import torch
 
 from transformers import pipeline, AutoModel, AutoTokenizer
-from nltk.tokenize import sent_tokenize
-import nltk
 
-nltk.download("punkt")
+# from nltk.tokenize import sent_tokenize
 
-from .utils import preprocess_sentences, build_graph, get_n_words
-from .pooling import Pooling
+# import nltk
+
+# nltk.download("punkt")
+
+from .utils import preprocess_sentences, build_graph, get_n_words, _sentence_tokenize
+
+# from .pooling import Pooling
 
 n_min_sentences_for_summarization = 2
 
@@ -35,7 +38,7 @@ class ReportsGenerator:
             - sentence_embedding_model_name: multilingual model, used to get the sentence embeddings
             ( https://huggingface.co/models?pipeline_tag=fill-mask&sort=downloads )
         """
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.summarization_model = pipeline(
             "summarization",
@@ -51,13 +54,13 @@ class ReportsGenerator:
             sentence_embedding_model_name
         )
 
-        self.pool = Pooling(
-            word_embedding_dimension=self.embeddings_model.config.hidden_size,
-            pooling_mode_mean_tokens=True,
-            pooling_mode_cls_token=False,
-            pooling_mode_max_tokens=True,
-            pooling_mode_mean_sqrt_len_tokens=False,
-        )
+        # self.pool = Pooling(
+        #    word_embedding_dimension=self.embeddings_model.config.hidden_size,
+        #    pooling_mode_mean_tokens=True,
+        #    pooling_mode_cls_token=False,
+        #    pooling_mode_max_tokens=True,
+        #    pooling_mode_mean_sqrt_len_tokens=False,
+        # )
 
     def _get_sentences_embeddings(self, original_sentences):
         """
@@ -74,24 +77,31 @@ class ReportsGenerator:
             padding="max_length",
             return_tensors="pt",
         )
-        with torch.no_grad():
-            transformer_output = self.embeddings_model(
+        # with torch.no_grad():
+        transformer_output = (
+            self.embeddings_model(
                 inputs["input_ids"].to(self.device),
                 attention_mask=inputs["attention_mask"].to(self.device),
-            ).last_hidden_state.cpu()
-
-        pooled_output = (
-            self.pool(
-                {
-                    "token_embeddings": transformer_output,
-                    "attention_mask": inputs["attention_mask"],
-                }
-            )["sentence_embedding"]
+            )
+            .last_hidden_state[:, 0, :]
             .detach()
-            .numpy()
+            .cpu()
         )
 
-        return pooled_output
+        return transformer_output
+
+        # pooled_output = (
+        #    self.pool(
+        #        {
+        #            "token_embeddings": transformer_output,
+        #            "attention_mask": inputs["attention_mask"],
+        #        }
+        #    )["sentence_embedding"]
+        #    .detach()
+        #    .numpy()
+        # )
+
+        # return pooled_output
 
     def _get_clusters(self, embeddings):
         """
@@ -209,7 +219,7 @@ class ReportsGenerator:
 
         # Get embeddings
         if type(entries) is str:
-            entries = sent_tokenize(entries)
+            entries = _sentence_tokenize(entries)
 
         entries_embeddings = self._get_sentences_embeddings(entries)
 
@@ -261,7 +271,7 @@ class ReportsGenerator:
                 f"Warning... The minimum number of words in the input is 20 but yours is shorter ({n_words}). No summary has been generated and the output is an empty string. Please provide a longer input text for a good quality summary."
             )
 
-        if len(sent_tokenize(entries_as_str)) < 2:
+        if len(_sentence_tokenize(entries_as_str)) < 2:
             warnings.warn(
                 "Warning... The minimum number of input sentences must be at least 2 but your input consists of only one sentence. No summary has been generated and the output is an empty string. Please provide at least one more sentence for a good quality summary."
             )

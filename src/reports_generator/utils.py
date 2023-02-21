@@ -5,14 +5,19 @@ warnings.filterwarnings("ignore")
 from typing import List, Union
 import networkx as nx
 import re
-import nltk
 
-nltk.download("stopwords")
-nltk.download("wordnet")
-nltk.download("omw-1.4")
-from nltk.corpus import stopwords
+# import nltk
 
-stop_words = set(stopwords.words())
+# nltk.download("stopwords")
+# nltk.download("wordnet")
+# nltk.download("omw-1.4")
+# from nltk.corpus import stopwords
+
+# stop_words = set(stopwords.words())
+
+
+def _sentence_tokenize(sentence: str):
+    return re.split(r"(?<=[^A-Z].[.?]) +(?=[A-Z])", sentence)
 
 
 def flatten(t):
@@ -50,22 +55,7 @@ def preprocess_one_sentence(sentence):
     if type(sentence) is not str:
         sentence = str(sentence)
 
-    new_words = []
-    words = sentence.split()
-
-    for word in words:
-
-        # lower and remove punctuation
-        new_word = re.sub(r"[^\w\s]", "", (word))
-
-        # keep clean words and remove hyperlinks
-        bool_word_not_empty_string = new_word != ""
-        bool_word_not_stop_word = new_word.lower() not in stop_words
-
-        if bool_word_not_empty_string and bool_word_not_stop_word:
-            new_words.append(new_word)
-
-    return " ".join(new_words).rstrip().lstrip()
+    return re.sub(r"[^\w\s]", "", sentence).rstrip().lstrip()
 
 
 def preprocess_sentences(all_tweets: List[str]):
