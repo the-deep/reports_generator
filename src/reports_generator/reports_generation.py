@@ -45,7 +45,7 @@ class ReportsGenerator:
             "summarization",
             model=summarization_model_name,
             tokenizer=summarization_model_name,
-            device=self.device,
+            # device=self.device,
         )
 
         self.embeddings_model = AutoModel.from_pretrained(
