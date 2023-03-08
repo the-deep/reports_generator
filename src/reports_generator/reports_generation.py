@@ -84,8 +84,7 @@ class ReportsGenerator:
                     inputs["input_ids"].to(self.device),
                     attention_mask=inputs["attention_mask"].to(self.device),
                 )
-                .last_hidden_state[:, 0, :]
-                .detach()
+                .last_hidden_state.detach()  # [:, 0, :]
                 .cpu()
             )
 
