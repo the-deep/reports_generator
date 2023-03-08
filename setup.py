@@ -19,7 +19,8 @@ setup(
         "networkx>=2.0",
         # "nltk>=3.6.7",
         "transformers>=4.9.2",
-        # "sentencepiece",
+        "torch@http://download.pytorch.org/whl/cpu/torch-1.9.1%2Bcpu-cp38-cp38-linux_x86_64.whl"
+        "sentencepiece",
     ],
     # *strongly* suggested for sharing
     version="0.2",
