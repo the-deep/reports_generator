@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import MiniBatchKMeans
 
-# import torch
+import torch
 
 from transformers import pipeline, AutoModel, AutoTokenizer
 
@@ -19,7 +19,7 @@ from transformers import pipeline, AutoModel, AutoTokenizer
 
 from .utils import preprocess_sentences, build_graph, get_n_words, _sentence_tokenize
 
-# from .pooling import Pooling
+from .pooling import Pooling
 
 n_min_sentences_for_summarization = 2
 
@@ -55,13 +55,13 @@ class ReportsGenerator:
             sentence_embedding_model_name
         )
 
-        # self.pool = Pooling(
-        #    word_embedding_dimension=self.embeddings_model.config.hidden_size,
-        #    pooling_mode_mean_tokens=True,
-        #    pooling_mode_cls_token=False,
-        #    pooling_mode_max_tokens=True,
-        #    pooling_mode_mean_sqrt_len_tokens=False,
-        # )
+        self.pool = Pooling(
+            word_embedding_dimension=self.embeddings_model.config.hidden_size,
+            pooling_mode_mean_tokens=True,
+            pooling_mode_cls_token=True,
+            pooling_mode_max_tokens=False,
+            pooling_mode_mean_sqrt_len_tokens=False,
+        )
 
     def _get_sentences_embeddings(self, original_sentences):
         """
@@ -78,31 +78,31 @@ class ReportsGenerator:
             padding="max_length",
             return_tensors="pt",
         )
-        # with torch.no_grad():
-        transformer_output = (
-            self.embeddings_model(
-                inputs["input_ids"].to(self.device),
-                attention_mask=inputs["attention_mask"].to(self.device),
+        with torch.no_grad():
+            transformer_output = (
+                self.embeddings_model(
+                    inputs["input_ids"].to(self.device),
+                    attention_mask=inputs["attention_mask"].to(self.device),
+                )
+                .last_hidden_state[:, 0, :]
+                .detach()
+                .cpu()
             )
-            .last_hidden_state[:, 0, :]
+
+        # return transformer_output
+
+        pooled_output = (
+            self.pool(
+                {
+                    "token_embeddings": transformer_output,
+                    "attention_mask": inputs["attention_mask"],
+                }
+            )["sentence_embedding"]
             .detach()
-            .cpu()
+            .numpy()
         )
 
-        return transformer_output
-
-        # pooled_output = (
-        #    self.pool(
-        #        {
-        #            "token_embeddings": transformer_output,
-        #            "attention_mask": inputs["attention_mask"],
-        #        }
-        #    )["sentence_embedding"]
-        #    .detach()
-        #    .numpy()
-        # )
-
-        # return pooled_output
+        return pooled_output
 
     def _get_clusters(self, embeddings):
         """
